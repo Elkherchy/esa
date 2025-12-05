@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Base de données PostgreSQL
   db:
@@ -49,13 +47,14 @@ services:
       - OLLAMA_HOST=0.0.0.0:11434
     networks:
       - esa-network
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+    # Décommentez la section deploy si vous avez un GPU NVIDIA
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
     restart: unless-stopped
 
   # Backend Django
