@@ -54,7 +54,11 @@ curl -X POST http://localhost:8001/api/auth/login/ \
     "password": "admin123"
   }'
 ```
-
+  -d '{
+    "email": "admin@esa-tez.com",
+    "password": "admin123"
+  }'
+{"user":{"id":"c1b5139f-8f24-41a8-9610-5d020e767c6a","email":"admin@esa-tez.com","username":"admin","first_name":"Admin","last_name":"ESA-TEZ","display_name":"Admin ESA-TEZ","role":"USER","origin":"LOCAL","is_active":true,"is_admin":false,"created_at":"2025-12-05T05:06:25.157223+01:00","updated_at":"2025-12-05T05:06:25.157233+01:00"},"tokens":{"refresh":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc2NTUxNDQwNiwiaWF0IjoxNzY0OTA5NjA2LCJqdGkiOiJjNDA0NGZjMTJkNTE0MDAzYTQyOGQyNjUwNGQwZTc1YyIsInVzZXJfaWQiOiJjMWI1MTM5Zi04ZjI0LTQxYTgtOTYxMC01ZDAyMGU3NjdjNmEifQ.sPw2MhoRmBRBCV8c1on2LQnej_Rxngcy8bOTw542rCE","access":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0OTEzMjA2LCJpYXQiOjE3NjQ5MDk2MDYsImp0aSI6IjYxN2U2NmZkODBiZTQ2Y2Q5MzBhMWQyYzUzNTNlMzM2IiwidXNlcl9pZCI6ImMxYjUxMzlmLThmMjQtNDFhOC05NjEwLTVkMDIwZTc2N2M2YSJ9.k-OpxYEq0F8k64UPqdcWb5Gt5pUI0IlHWxTP3H3rsdU"},"message":"Connexion réussie"}% 
 ### 3. Rafraîchir le token
 
 ```bash
