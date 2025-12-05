@@ -119,7 +119,7 @@ services:
 
   # Mayan EDMS
   mayan:
-    image: mayanedms/mayanedms:4.5
+    image: mayanedms/mayanedms:latest
     container_name: esa-tez-mayan
     environment:
       MAYAN_DATABASE_ENGINE: django.db.backends.postgresql
