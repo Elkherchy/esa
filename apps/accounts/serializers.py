@@ -91,3 +91,4 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = ['role', 'is_active']
 
 
+

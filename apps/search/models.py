@@ -29,3 +29,4 @@ class SearchQuery(models.Model):
         return f"{self.user} - {self.query}"
 
 
+

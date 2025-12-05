@@ -11,3 +11,4 @@ class DocumentAccessLogAdmin(admin.ModelAdmin):
     date_hierarchy = 'accessed_at'
 
 
+

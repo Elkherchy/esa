@@ -7,3 +7,4 @@ class AnalyticsConfig(AppConfig):
     verbose_name = 'Analytics'
 
 
+

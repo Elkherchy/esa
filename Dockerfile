@@ -27,12 +27,13 @@ COPY . .
 RUN mkdir -p /app/media /app/staticfiles
 
 # Exposer le port
-EXPOSE 8000
+EXPOSE 8001
 
 # Script de démarrage
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
+
 
 

@@ -46,3 +46,4 @@ class DocumentAccessLog(models.Model):
         return f"{self.user} - {self.action} - {self.document.title}"
 
 
+

@@ -25,3 +25,4 @@ class UserAdmin(BaseUserAdmin):
     )
 
 
+

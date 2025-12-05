@@ -14,3 +14,4 @@ EXPOSE 11434
 ENTRYPOINT ["/init.sh"]
 
 
+

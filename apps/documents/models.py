@@ -113,3 +113,4 @@ class DocumentAnalysis(models.Model):
         return f"Analyse de {self.document.title}"
 
 
+

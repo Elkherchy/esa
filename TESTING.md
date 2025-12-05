@@ -33,13 +33,13 @@ docker-compose ps
 
 #### a) Healthcheck
 ```bash
-curl http://localhost:8000/admin/
+curl http://localhost:8001/admin/
 # Devrait retourner la page d'admin Django (200 OK)
 ```
 
 #### b) Connexion Admin
 ```bash
-curl -X POST http://localhost:8000/api/auth/login/ \
+curl -X POST http://localhost:8001/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@esa-tez.com",
@@ -83,7 +83,7 @@ Le système devrait être capable d'identifier les thèmes principaux de ce docu
 ```bash
 export ACCESS_TOKEN="votre_token_ici"
 
-curl -X POST http://localhost:8000/api/documents/ \
+curl -X POST http://localhost:8001/api/documents/ \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -F "file=@test.txt" \
   -F "title=Document de Test IA" \
@@ -116,7 +116,7 @@ docker-compose exec ollama ollama list
 ```bash
 export DOCUMENT_ID="uuid-du-document"
 
-curl -X POST http://localhost:8000/api/documents/$DOCUMENT_ID/analyze/ \
+curl -X POST http://localhost:8001/api/documents/$DOCUMENT_ID/analyze/ \
   -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
@@ -141,7 +141,7 @@ docker-compose logs -f celery
 
 #### d) Récupérer le document analysé
 ```bash
-curl -X GET http://localhost:8000/api/documents/$DOCUMENT_ID/ \
+curl -X GET http://localhost:8001/api/documents/$DOCUMENT_ID/ \
   -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
@@ -169,7 +169,7 @@ curl -X GET http://localhost:8000/api/documents/$DOCUMENT_ID/ \
 ### 5. Test de Recherche
 
 ```bash
-curl -X GET "http://localhost:8000/api/documents/?search=test" \
+curl -X GET "http://localhost:8001/api/documents/?search=test" \
   -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
@@ -177,7 +177,7 @@ curl -X GET "http://localhost:8000/api/documents/?search=test" \
 
 #### a) Créer un utilisateur normal
 ```bash
-curl -X POST http://localhost:8000/api/auth/register/ \
+curl -X POST http://localhost:8001/api/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@test.com",
@@ -192,7 +192,7 @@ curl -X POST http://localhost:8000/api/auth/register/ \
 #### b) Tester l'accès aux documents
 ```bash
 # Se connecter avec le nouvel utilisateur
-curl -X POST http://localhost:8000/api/auth/login/ \
+curl -X POST http://localhost:8001/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@test.com",
@@ -221,7 +221,7 @@ open http://localhost:8001
 ### 8. Test des Statistiques (Admin)
 
 ```bash
-curl -X GET http://localhost:8000/api/documents/stats/ \
+curl -X GET http://localhost:8001/api/documents/stats/ \
   -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
@@ -254,10 +254,10 @@ docker-compose ps
 **0:30 - 1:30 : Connexion et Upload**
 ```bash
 # Se connecter
-curl -X POST http://localhost:8000/api/auth/login/ ...
+curl -X POST http://localhost:8001/api/auth/login/ ...
 
 # Uploader un document PDF
-curl -X POST http://localhost:8000/api/documents/ ...
+curl -X POST http://localhost:8001/api/documents/ ...
 ```
 
 **1:30 - 3:00 : Analyse IA en Direct**
@@ -275,7 +275,7 @@ docker-compose logs -f celery
 **3:00 - 4:00 : Résultats de l'Analyse**
 ```bash
 # Récupérer le document avec analyse
-curl -X GET http://localhost:8000/api/documents/$DOCUMENT_ID/
+curl -X GET http://localhost:8001/api/documents/$DOCUMENT_ID/
 
 # Montrer :
 # - Le résumé généré
@@ -371,5 +371,6 @@ docker-compose exec backend python manage.py migrate
 ---
 
 **🎉 Système prêt pour la démonstration !**
+
 
 

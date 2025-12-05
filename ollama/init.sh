@@ -24,3 +24,4 @@ echo "🎉 Service Ollama prêt avec Mistral 7B!"
 wait
 
 
+

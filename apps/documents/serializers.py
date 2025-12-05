@@ -146,3 +146,4 @@ class DocumentListSerializer(serializers.ModelSerializer):
         return hasattr(obj, 'analysis')
 
 
+

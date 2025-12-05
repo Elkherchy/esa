@@ -7,3 +7,4 @@ class SearchConfig(AppConfig):
     verbose_name = 'Recherche'
 
 
+

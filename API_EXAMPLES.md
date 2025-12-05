@@ -9,7 +9,7 @@ Ce document fournit des exemples concrets d'utilisation de l'API ESA-TEZ.
 ### 1. Créer un compte
 
 ```bash
-curl -X POST http://localhost:8000/api/auth/register/ \
+curl -X POST http://localhost:8001/api/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{
     "email": "jean.dupont@example.com",
@@ -47,7 +47,7 @@ curl -X POST http://localhost:8000/api/auth/register/ \
 ### 2. Se connecter
 
 ```bash
-curl -X POST http://localhost:8000/api/auth/login/ \
+curl -X POST http://localhost:8001/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@esa-tez.com",
@@ -58,7 +58,7 @@ curl -X POST http://localhost:8000/api/auth/login/ \
 ### 3. Rafraîchir le token
 
 ```bash
-curl -X POST http://localhost:8000/api/auth/refresh/ \
+curl -X POST http://localhost:8001/api/auth/refresh/ \
   -H "Content-Type: application/json" \
   -d '{
     "refresh": "votre_refresh_token"
@@ -68,7 +68,7 @@ curl -X POST http://localhost:8000/api/auth/refresh/ \
 ### 4. Obtenir les infos utilisateur
 
 ```bash
-curl -X GET http://localhost:8000/api/auth/me/ \
+curl -X GET http://localhost:8001/api/auth/me/ \
   -H "Authorization: Bearer votre_access_token"
 ```
 
@@ -79,7 +79,7 @@ curl -X GET http://localhost:8000/api/auth/me/ \
 ### 1. Uploader un document
 
 ```bash
-curl -X POST http://localhost:8000/api/documents/ \
+curl -X POST http://localhost:8001/api/documents/ \
   -H "Authorization: Bearer votre_access_token" \
   -F "file=@/chemin/vers/document.pdf" \
   -F "title=Rapport Annuel 2024" \
@@ -95,7 +95,7 @@ curl -X POST http://localhost:8000/api/documents/ \
   "title": "Rapport Annuel 2024",
   "description": "Rapport financier de l'année 2024",
   "file": "/media/documents/2024/12/document.pdf",
-  "file_url": "http://localhost:8000/media/documents/2024/12/document.pdf",
+  "file_url": "http://localhost:8001/media/documents/2024/12/document.pdf",
   "file_size": 524288,
   "page_count": 15,
   "owner": {
@@ -118,11 +118,11 @@ curl -X POST http://localhost:8000/api/documents/ \
 
 ```bash
 # Tous les documents
-curl -X GET http://localhost:8000/api/documents/ \
+curl -X GET http://localhost:8001/api/documents/ \
   -H "Authorization: Bearer votre_access_token"
 
 # Avec filtres
-curl -X GET "http://localhost:8000/api/documents/?search=rapport&visibility=PRIVATE&tags=Finance&analyzed=true&ordering=-created_at&page=1" \
+curl -X GET "http://localhost:8001/api/documents/?search=rapport&visibility=PRIVATE&tags=Finance&analyzed=true&ordering=-created_at&page=1" \
   -H "Authorization: Bearer votre_access_token"
 ```
 
@@ -141,7 +141,7 @@ curl -X GET "http://localhost:8000/api/documents/?search=rapport&visibility=PRIV
 ### 3. Récupérer un document
 
 ```bash
-curl -X GET http://localhost:8000/api/documents/7c9e6679-7425-40de-944b-e07fc1f90ae7/ \
+curl -X GET http://localhost:8001/api/documents/7c9e6679-7425-40de-944b-e07fc1f90ae7/ \
   -H "Authorization: Bearer votre_access_token"
 ```
 
@@ -170,7 +170,7 @@ curl -X GET http://localhost:8000/api/documents/7c9e6679-7425-40de-944b-e07fc1f9
 ### 4. Modifier un document
 
 ```bash
-curl -X PATCH http://localhost:8000/api/documents/7c9e6679-7425-40de-944b-e07fc1f90ae7/ \
+curl -X PATCH http://localhost:8001/api/documents/7c9e6679-7425-40de-944b-e07fc1f90ae7/ \
   -H "Authorization: Bearer votre_access_token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -184,14 +184,14 @@ curl -X PATCH http://localhost:8000/api/documents/7c9e6679-7425-40de-944b-e07fc1
 ### 5. Supprimer un document
 
 ```bash
-curl -X DELETE http://localhost:8000/api/documents/7c9e6679-7425-40de-944b-e07fc1f90ae7/ \
+curl -X DELETE http://localhost:8001/api/documents/7c9e6679-7425-40de-944b-e07fc1f90ae7/ \
   -H "Authorization: Bearer votre_access_token"
 ```
 
 ### 6. Lancer l'analyse IA manuelle
 
 ```bash
-curl -X POST http://localhost:8000/api/documents/7c9e6679-7425-40de-944b-e07fc1f90ae7/analyze/ \
+curl -X POST http://localhost:8001/api/documents/7c9e6679-7425-40de-944b-e07fc1f90ae7/analyze/ \
   -H "Authorization: Bearer votre_access_token"
 ```
 
@@ -211,7 +211,7 @@ curl -X POST http://localhost:8000/api/documents/7c9e6679-7425-40de-944b-e07fc1f
 ### 1. Lister tous les tags
 
 ```bash
-curl -X GET http://localhost:8000/api/documents/tags/ \
+curl -X GET http://localhost:8001/api/documents/tags/ \
   -H "Authorization: Bearer votre_access_token"
 ```
 
@@ -240,7 +240,7 @@ curl -X GET http://localhost:8000/api/documents/tags/ \
 ### 1. Statistiques des documents (Admin)
 
 ```bash
-curl -X GET http://localhost:8000/api/documents/stats/ \
+curl -X GET http://localhost:8001/api/documents/stats/ \
   -H "Authorization: Bearer votre_access_token"
 ```
 
@@ -260,21 +260,21 @@ curl -X GET http://localhost:8000/api/documents/stats/ \
 ### 1. Lister les utilisateurs
 
 ```bash
-curl -X GET "http://localhost:8000/api/auth/users/?role=USER&status=active&search=jean" \
+curl -X GET "http://localhost:8001/api/auth/users/?role=USER&status=active&search=jean" \
   -H "Authorization: Bearer votre_access_token"
 ```
 
 ### 2. Détails d'un utilisateur
 
 ```bash
-curl -X GET http://localhost:8000/api/auth/users/550e8400-e29b-41d4-a716-446655440000/ \
+curl -X GET http://localhost:8001/api/auth/users/550e8400-e29b-41d4-a716-446655440000/ \
   -H "Authorization: Bearer votre_access_token"
 ```
 
 ### 3. Modifier un utilisateur
 
 ```bash
-curl -X PATCH http://localhost:8000/api/auth/users/550e8400-e29b-41d4-a716-446655440000/ \
+curl -X PATCH http://localhost:8001/api/auth/users/550e8400-e29b-41d4-a716-446655440000/ \
   -H "Authorization: Bearer votre_access_token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -293,7 +293,7 @@ curl -X PATCH http://localhost:8000/api/auth/users/550e8400-e29b-41d4-a716-44665
 import requests
 
 # Configuration
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 EMAIL = "admin@esa-tez.com"
 PASSWORD = "admin123"
 
@@ -371,7 +371,7 @@ print(f"Trouvé {documents['count']} documents")
 ## 🌐 Exemples JavaScript/Fetch
 
 ```javascript
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'http://localhost:8001';
 
 // 1. Se connecter
 async function login(email, password) {
@@ -457,13 +457,13 @@ async function getDocument(token, documentId) {
 
 ```bash
 # 1. Se connecter
-TOKEN=$(curl -s -X POST http://localhost:8000/api/auth/login/ \
+TOKEN=$(curl -s -X POST http://localhost:8001/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@esa-tez.com","password":"admin123"}' \
   | jq -r '.tokens.access')
 
 # 2. Uploader un document (l'analyse se lance automatiquement)
-DOC_ID=$(curl -s -X POST http://localhost:8000/api/documents/ \
+DOC_ID=$(curl -s -X POST http://localhost:8001/api/documents/ \
   -H "Authorization: Bearer $TOKEN" \
   -F "file=@rapport.pdf" \
   -F "title=Rapport Q4 2024" \
@@ -472,7 +472,7 @@ DOC_ID=$(curl -s -X POST http://localhost:8000/api/documents/ \
 
 # 3. Attendre et récupérer l'analyse
 sleep 10
-curl -X GET http://localhost:8000/api/documents/$DOC_ID/ \
+curl -X GET http://localhost:8001/api/documents/$DOC_ID/ \
   -H "Authorization: Bearer $TOKEN" \
   | jq '.analysis'
 ```
@@ -481,7 +481,7 @@ curl -X GET http://localhost:8000/api/documents/$DOC_ID/ \
 
 ```bash
 # Rechercher tous les rapports financiers analysés
-curl -X GET "http://localhost:8000/api/documents/?search=finance&tags=Rapport&analyzed=true&ordering=-created_at" \
+curl -X GET "http://localhost:8001/api/documents/?search=finance&tags=Rapport&analyzed=true&ordering=-created_at" \
   -H "Authorization: Bearer $TOKEN" \
   | jq '.results[] | {title, analyzed, key_points: .analysis.key_points}'
 ```
@@ -489,5 +489,6 @@ curl -X GET "http://localhost:8000/api/documents/?search=finance&tags=Rapport&an
 ---
 
 **📚 Pour plus d'informations, consultez README.md et TESTING.md**
+
 
 

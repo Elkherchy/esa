@@ -145,3 +145,4 @@ class UserDetailView(generics.RetrieveUpdateAPIView):
         return User.objects.all()
 
 
+

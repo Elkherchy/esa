@@ -94,8 +94,8 @@ docker-compose up --build
 - Initialisation de la base de données
 
 4. **Accéder aux services**
-- API Backend : http://localhost:8000
-- Admin Django : http://localhost:8000/admin
+- API Backend : http://localhost:8001
+- Admin Django : http://localhost:8001/admin
 - Mayan EDMS : http://localhost:8001
 
 ### Compte par Défaut
@@ -136,7 +136,7 @@ GET    /api/documents/stats/             # Statistiques (admin)
 
 **Login et récupération du token**
 ```bash
-curl -X POST http://localhost:8000/api/auth/login/ \
+curl -X POST http://localhost:8001/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@esa-tez.com",
@@ -146,7 +146,7 @@ curl -X POST http://localhost:8000/api/auth/login/ \
 
 **Upload d'un document**
 ```bash
-curl -X POST http://localhost:8000/api/documents/ \
+curl -X POST http://localhost:8001/api/documents/ \
   -H "Authorization: Bearer {ACCESS_TOKEN}" \
   -F "file=@document.pdf" \
   -F "title=Mon Document" \
@@ -156,7 +156,7 @@ curl -X POST http://localhost:8000/api/documents/ \
 
 **Récupérer un document avec analyse IA**
 ```bash
-curl -X GET http://localhost:8000/api/documents/{DOCUMENT_ID}/ \
+curl -X GET http://localhost:8001/api/documents/{DOCUMENT_ID}/ \
   -H "Authorization: Bearer {ACCESS_TOKEN}"
 ```
 
@@ -404,7 +404,7 @@ Pour toute question ou problème :
    ```
 
 2. **Se connecter à l'admin**
-   - URL : http://localhost:8000/admin
+   - URL : http://localhost:8001/admin
    - Login : admin@esa-tez.com / admin123
 
 3. **Uploader un document PDF**
@@ -419,5 +419,6 @@ Pour toute question ou problème :
 ---
 
 **Fait avec ❤️ pour la Nuit de l'Info 2024**
+
 
 

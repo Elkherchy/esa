@@ -11,3 +11,4 @@ class SearchQueryAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
 
 
+

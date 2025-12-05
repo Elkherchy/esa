@@ -51,3 +51,4 @@ class DocumentAnalysisAdmin(admin.ModelAdmin):
     readonly_fields = ['analyzed_at', 'updated_at']
 
 
+

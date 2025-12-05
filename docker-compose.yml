@@ -70,7 +70,7 @@ services:
       - media_data:/app/media
       - static_data:/app/staticfiles
     ports:
-      - "8000:8000"
+      - "8001:8000"
     environment:
       - DEBUG=${DEBUG:-True}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-django-insecure-default-key}
@@ -132,7 +132,7 @@ services:
     volumes:
       - mayan_data:/var/lib/mayan
     ports:
-      - "8001:8000"
+      - "8002:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -155,5 +155,6 @@ volumes:
 networks:
   esa-network:
     driver: bridge
+
 
 
