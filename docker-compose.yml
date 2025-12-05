@@ -1,0 +1,159 @@
+version: '3.8'
+
+services:
+  # Base de données PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: esa-tez-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-esa_tez_db}
+      POSTGRES_USER: ${POSTGRES_USER:-esa_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-esa_password_secure}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U esa_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - esa-network
+
+  # Redis pour Celery
+  redis:
+    image: redis:7-alpine
+    container_name: esa-tez-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - esa-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Service Ollama avec Mistral
+  ollama:
+    build:
+      context: ./ollama
+      dockerfile: Dockerfile
+    container_name: esa-tez-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    networks:
+      - esa-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  # Backend Django
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: esa-tez-backend
+    command: /docker-entrypoint.sh
+    volumes:
+      - .:/app
+      - media_data:/app/media
+      - static_data:/app/staticfiles
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=${DEBUG:-True}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-django-insecure-default-key}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://esa_user:esa_password_secure@db:5432/esa_tez_db}
+      - POSTGRES_USER=${POSTGRES_USER:-esa_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-esa_password_secure}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-mistral:7b}
+      - MAYAN_HOST=${MAYAN_HOST:-http://mayan:8000}
+      - MAYAN_API_URL=${MAYAN_API_URL:-http://mayan:8000/api/v4}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - esa-network
+    restart: unless-stopped
+
+  # Celery Worker pour tâches asynchrones
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: esa-tez-celery
+    command: celery -A config worker -l info
+    volumes:
+      - .:/app
+      - media_data:/app/media
+    environment:
+      - DEBUG=${DEBUG:-True}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-django-insecure-default-key}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://esa_user:esa_password_secure@db:5432/esa_tez_db}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-mistral:7b}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+    depends_on:
+      - db
+      - redis
+      - backend
+    networks:
+      - esa-network
+    restart: unless-stopped
+
+  # Mayan EDMS
+  mayan:
+    image: mayanedms/mayanedms:4.5
+    container_name: esa-tez-mayan
+    environment:
+      MAYAN_DATABASE_ENGINE: django.db.backends.postgresql
+      MAYAN_DATABASE_HOST: db
+      MAYAN_DATABASE_NAME: mayan_db
+      MAYAN_DATABASE_USER: ${POSTGRES_USER:-esa_user}
+      MAYAN_DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-esa_password_secure}
+      MAYAN_MEDIA_ROOT: /var/lib/mayan
+    volumes:
+      - mayan_data:/var/lib/mayan
+    ports:
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - esa-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  ollama_data:
+    driver: local
+  media_data:
+    driver: local
+  static_data:
+    driver: local
+  mayan_data:
+    driver: local
+
+networks:
+  esa-network:
+    driver: bridge
+
+
