@@ -1,424 +1,558 @@
-# 🏆 ESA-TEZ - Coffre-Fort Documentaire Intelligent
+# 📦 Coffre-Fort Documentaire IA - ESA-TEZ
 
-[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
-[![Django](https://img.shields.io/badge/Django-4.2-green.svg)](https://www.djangoproject.com/)
-[![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](https://www.docker.com/)
-[![Mistral AI](https://img.shields.io/badge/AI-Mistral%207B-orange.svg)](https://mistral.ai/)
+Application web moderne de gestion documentaire sécurisée avec intelligence artificielle locale, intégrant recherche OCR, résumé automatique de documents et gestion fine des permissions.
 
-## 📋 Description
+## 🎯 Vue d'ensemble
 
-Module de Coffre-Fort Documentaire complet avec analyse IA locale, destiné à s'intégrer comme service externe au sein d'un écosystème numérique. Ce projet implémente les 4 piliers techniques du Défi National ESA-TECH.
-
-### ✨ Fonctionnalités Principales
-
-- 📁 **Stockage Sécurisé** : Upload et gestion de documents avec Mayan EDMS
-- 🤖 **Analyse IA Locale** : Résumés automatiques et extraction de mots-clés avec Mistral 7B
-- 🔐 **Gestion des Accès** : Permissions par rôles et accès temporaires
-- 🔍 **Recherche Avancée** : Recherche sémantique dans les documents
-- 📊 **Statistiques** : Dashboards admin et utilisateur
-- 🐳 **100% Conteneurisé** : Déploiement complet avec Docker Compose
-
----
+Cette application permet de :
+- **Téléverser et gérer** des documents (PDF, DOCX, TXT)
+- **Analyser automatiquement** les documents avec un modèle IA local (Mistral 7B)
+- **Rechercher** dans les documents via OCR et recherche sémantique
+- **Gérer les permissions** avec contrôle temporel et basé sur les rôles
+- **Administrer** les utilisateurs et les documents
+- **Sécuriser** les accès avec authentification JWT
 
 ## 🏗️ Architecture
 
+### Schéma d'architecture
+
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    ESA-TEZ Architecture                      │
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
-│  │  Client  │  │ Backend  │  │  Ollama  │  │  Mayan   │   │
-│  │   Web    │◄─┤  Django  │◄─┤ Mistral  │  │   EDMS   │   │
-│  │          │  │   API    │  │    7B    │  │          │   │
-│  └──────────┘  └─────┬────┘  └──────────┘  └──────────┘   │
-│                      │                                       │
-│                 ┌────┴────┐                                  │
-│                 │ Celery  │                                  │
-│                 │ Workers │                                  │
-│                 └────┬────┘                                  │
-│                      │                                       │
-│           ┌──────────┼──────────┐                           │
-│           │          │          │                            │
-│      ┌────▼────┐ ┌──▼───┐  ┌───▼────┐                      │
-│      │  Redis  │ │  DB  │  │ Media  │                       │
-│      │         │ │ PG   │  │ Files  │                       │
-│      └─────────┘ └──────┘  └────────┘                       │
-│                                                               │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                         CLIENT WEB (React)                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │  Frontend    │  │  API Service │  │  UI Components│          │
+│  │  (Vite)      │  │  (TypeScript)│  │  (shadcn-ui)  │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+└────────────────────────────┬──────────────────────────────────┘
+                              │ HTTP/REST (JWT)
+                              │
+┌─────────────────────────────▼──────────────────────────────────┐
+│                    BACKEND API (Django REST)                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │  Auth        │  │  Documents   │  │  Permissions │          │
+│  │  (JWT)       │  │  (CRUD)      │  │  (RBAC)      │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │  Analytics   │  │  Search      │  │  Tags        │          │
+│  │  (Stats)     │  │  (OCR/Full)  │  │  (Metadata)  │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+└────────────────────────────┬──────────────────────────────────┘
+                              │
+                    ┌─────────┴─────────┐
+                    │                   │
+        ┌───────────▼──────────┐  ┌────▼──────────────────────┐
+        │   Mayan EDMS          │  │   Service IA Local        │
+        │   (Stockage)          │  │   (Mistral 7B)            │
+        │                       │  │                          │
+        │  - Documents          │  │  - Analyse de texte      │
+        │  - OCR                │  │  - Résumé automatique    │
+        │  - Métadonnées        │  │  - Extraction mots-clés  │
+        └───────────────────────┘  └──────────────────────────┘
+                              │
+                    ┌─────────┴─────────┐
+                    │                   │
+        ┌───────────▼──────────┐  ┌────▼──────────────────────┐
+        │   PostgreSQL          │  │   Redis (Optionnel)       │
+        │   (Base de données)   │  │   (Cache/Tasks)           │
+        └───────────────────────┘  └──────────────────────────┘
 ```
 
-### Services Docker
+### Composants principaux
 
-| Service | Port | Description |
-|---------|------|-------------|
-| **backend** | 8000 | API Django REST Framework |
-| **db** | 5432 | PostgreSQL Database |
-| **ollama** | 11434 | Service IA avec Mistral 7B |
-| **mayan** | 8001 | Mayan EDMS |
-| **redis** | 6379 | Cache et broker Celery |
-| **celery** | - | Workers pour tâches asynchrones |
+1. **Frontend (React + TypeScript + Vite)**
+   - Interface utilisateur moderne avec shadcn-ui
+   - Gestion d'état avec React Hooks
+   - Service API centralisé pour communiquer avec le backend
+   - Authentification JWT avec refresh automatique
 
----
+2. **Backend (Django REST Framework)**
+   - API RESTful complète
+   - Authentification JWT (djangorestframework-simplejwt)
+   - Intégration avec Mayan EDMS pour le stockage
+   - Service d'analyse IA local
+   - Gestion des permissions temporelles
 
-## 🚀 Installation et Démarrage
+3. **Mayan EDMS**
+   - Stockage sécurisé des documents
+   - OCR automatique
+   - Gestion des versions
+   - Métadonnées enrichies
+
+4. **Service IA (Mistral 7B)**
+   - Analyse locale des documents
+   - Génération de résumés
+   - Extraction de mots-clés
+   - Pas de données envoyées à l'extérieur
+
+## 🚀 Installation rapide
 
 ### Prérequis
 
-- Docker Engine 20.10+
-- Docker Compose 2.0+
-- 16 GB RAM minimum (recommandé pour Mistral 7B)
-- 20 GB espace disque libre
+- Docker et Docker Compose installés
+- Git
+- 8 GB de RAM minimum (pour le modèle IA)
+- Ports disponibles : 3000 (frontend), 8001 (backend), 8000 (Mayan)
 
-### Démarrage Rapide
+### Installation en une commande
 
-1. **Cloner le repository**
 ```bash
-git clone <repository-url>
-cd esa-tez
+# Cloner le dépôt
+git clone https://github.com/Elkherchy/esa.git
+cd esa
+
+# Lancer tous les services
+docker-compose up -d
+
+# Attendre que tous les services soient prêts (environ 2-3 minutes)
+docker-compose logs -f
 ```
 
-2. **Copier le fichier d'environnement**
+L'application sera accessible sur :
+- **Frontend** : http://localhost:3000
+- **Backend API** : http://localhost:8001
+- **Mayan EDMS** : http://localhost:8000
+- **Documentation API** : http://localhost:8001/api/docs/
+
+### Comptes par défaut
+
+Après le premier lancement, créez un compte administrateur :
+
 ```bash
-cp .env.example .env
+# Accéder au conteneur backend
+docker-compose exec backend python manage.py createsuperuser
+
+# Ou utiliser le script d'initialisation
+docker-compose exec backend python manage.py init_admin
 ```
 
-3. **Lancer tous les services**
+**Compte de test** (si créé) :
+- Email : `admin@esa-tez.com`
+- Mot de passe : `admin123`
+
+## 📋 Configuration
+
+### Variables d'environnement
+
+#### Frontend (`.env`)
+
+```env
+VITE_API_BASE_URL=http://localhost:8001
+```
+
+#### Backend (`backend/.env`)
+
+```env
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# Base de données
+DATABASE_URL=postgresql://mayan:mayan@db:5432/mayan
+
+# Mayan EDMS
+MAYAN_BASE_URL=http://mayan:8000
+MAYAN_API_KEY=your-mayan-api-key
+
+# IA Service
+AI_SERVICE_URL=http://ai-service:5000
+AI_MODEL=mistral:7b
+
+# JWT
+JWT_SECRET_KEY=your-jwt-secret
+JWT_ALGORITHM=HS256
+JWT_ACCESS_TOKEN_LIFETIME=3600
+JWT_REFRESH_TOKEN_LIFETIME=86400
+```
+
+### Configuration Docker Compose
+
+Le fichier `docker-compose.yml` configure automatiquement :
+- Réseau Docker pour la communication inter-services
+- Volumes persistants pour les données
+- Variables d'environnement
+- Health checks pour tous les services
+
+## 🎮 Utilisation
+
+### 1. Connexion
+
+1. Accédez à http://localhost:3000
+2. Connectez-vous avec vos identifiants
+3. Vous serez redirigé vers le dashboard selon votre rôle
+
+### 2. Téléverser un document
+
+1. Cliquez sur **"Téléverser un document"** (admin) ou **"Mes documents"** (utilisateur)
+2. Glissez-déposez un fichier ou cliquez pour parcourir
+3. Remplissez les métadonnées (titre, visibilité, tags)
+4. Cliquez sur **"Téléverser"**
+
+Le document sera :
+- Stocké dans Mayan EDMS
+- Analysé par OCR automatiquement
+- Disponible pour l'analyse IA
+
+### 3. Analyser un document avec l'IA
+
+1. Ouvrez un document depuis la liste
+2. Cliquez sur **"Analyser le document"**
+3. Attendez quelques secondes (analyse locale)
+4. Consultez le résumé et les mots-clés générés
+
+### 4. Rechercher des documents
+
+1. Utilisez la barre de recherche dans **"Mes documents"**
+2. Filtrez par :
+   - Visibilité (Privé, Par rôle, Public)
+   - Tags
+   - Date de création
+   - Statut d'analyse
+
+### 5. Gérer les permissions (Admin)
+
+1. Accédez à **"Gérer les permissions"**
+2. Cliquez sur **"Ajouter une permission"**
+3. Sélectionnez :
+   - Document
+   - Bénéficiaire (utilisateur ou rôle)
+   - Période d'accès (début et fin)
+4. La permission sera appliquée automatiquement
+
+## 🔧 Développement
+
+### Structure du projet
+
+```
+.
+├── src/                          # Code source frontend
+│   ├── components/              # Composants React
+│   │   ├── layout/              # Layout principal
+│   │   ├── pages/               # Pages de l'application
+│   │   └── ui/                  # Composants UI (shadcn-ui)
+│   ├── services/                # Services (API, etc.)
+│   └── App.tsx                  # Point d'entrée
+├── backend/                      # Code source backend
+│   ├── apps/                    # Applications Django
+│   │   ├── accounts/            # Gestion des utilisateurs
+│   │   ├── documents/           # Gestion des documents
+│   │   ├── permissions/         # Gestion des permissions
+│   │   ├── analytics/           # Statistiques
+│   │   └── search/              # Recherche
+│   ├── config/                  # Configuration Django
+│   └── requirements.txt         # Dépendances Python
+├── docker-compose.yml           # Configuration Docker
+├── Dockerfile                   # Image Docker frontend
+└── README.md                    # Ce fichier
+```
+
+### Lancer en mode développement
+
+#### Frontend
+
 ```bash
-docker-compose up --build
+cd frontend
+npm install
+npm run dev
 ```
 
-⏱️ **Premier démarrage** : Comptez 5-10 minutes pour :
-- Build des images Docker
-- Téléchargement de Mistral 7B (~4.1 GB)
-- Initialisation de la base de données
+#### Backend
 
-4. **Accéder aux services**
-- API Backend : http://localhost:8001
-- Admin Django : http://localhost:8001/admin
-- Mayan EDMS : http://localhost:8001
-
-### Compte par Défaut
-
-```
-Email: admin@esa-tez.com
-Password: admin123
-```
-
----
-
-## 📡 API Endpoints
-
-### Authentification
-
-```http
-POST /api/auth/register/         # Créer un compte
-POST /api/auth/login/            # Se connecter
-POST /api/auth/logout/           # Se déconnecter
-POST /api/auth/refresh/          # Rafraîchir le token
-GET  /api/auth/me/               # Infos utilisateur
-```
-
-### Documents
-
-```http
-GET    /api/documents/                   # Liste des documents
-POST   /api/documents/                   # Upload un document
-GET    /api/documents/{id}/              # Détails d'un document
-PATCH  /api/documents/{id}/              # Modifier un document
-DELETE /api/documents/{id}/              # Supprimer un document
-POST   /api/documents/{id}/analyze/      # Lancer l'analyse IA
-GET    /api/documents/tags/              # Liste des tags
-GET    /api/documents/stats/             # Statistiques (admin)
-```
-
-### Exemples d'utilisation
-
-**Login et récupération du token**
 ```bash
-curl -X POST http://localhost:8001/api/auth/login/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "admin@esa-tez.com",
-    "password": "admin123"
-  }'
-```
-
-**Upload d'un document**
-```bash
-curl -X POST http://localhost:8001/api/documents/ \
-  -H "Authorization: Bearer {ACCESS_TOKEN}" \
-  -F "file=@document.pdf" \
-  -F "title=Mon Document" \
-  -F "description=Description du document" \
-  -F "visibility=PRIVATE"
-```
-
-**Récupérer un document avec analyse IA**
-```bash
-curl -X GET http://localhost:8001/api/documents/{DOCUMENT_ID}/ \
-  -H "Authorization: Bearer {ACCESS_TOKEN}"
-```
-
----
-
-## 🤖 Intelligence Artificielle
-
-### Modèle : Mistral 7B
-
-Le système utilise **Mistral 7B** via **Ollama** pour l'analyse locale des documents.
-
-#### Capacités IA
-
-1. **Résumé Automatique** : Génération de résumés concis en français
-2. **Extraction de Mots-Clés** : Identification des 5-7 concepts clés
-3. **Analyse Sémantique** : Compréhension du contenu documentaire
-4. **Privacy-First** : Aucune donnée ne quitte le serveur local
-
-#### Formats Supportés
-
-- 📄 PDF (avec extraction de texte)
-- 📝 DOCX / DOC
-- 📃 TXT
-- 🖼️ Images (avec OCR - à venir)
-
-#### Performance
-
-- Temps d'analyse moyen : 5-15 secondes
-- Capacité : Jusqu'à 4000 caractères par analyse
-- Modèle : mistral:7b (~4.1 GB)
-
----
-
-## 🔐 Gestion des Permissions
-
-### Rôles Utilisateurs
-
-| Rôle | Description | Permissions |
-|------|-------------|-------------|
-| **ADMIN** | Administrateur | Gestion complète |
-| **USER** | Utilisateur | Documents personnels + publics |
-
-### Visibilité des Documents
-
-- **PRIVATE** : Seul le propriétaire peut accéder
-- **ROLE_BASED** : Accessible selon le rôle
-- **PUBLIC** : Accessible à tous les utilisateurs authentifiés
-
-### Accès Temporaires
-
-Les administrateurs peuvent définir des fenêtres d'accès temporaires :
-- Par utilisateur spécifique
-- Par rôle
-- Avec dates de début et fin
-
----
-
-## 📊 Statistiques et Monitoring
-
-### Dashboard Admin
-
-- Total de documents
-- Documents analysés
-- Utilisateurs actifs
-- Permissions temporaires actives
-
-### Dashboard Utilisateur
-
-- Mes documents récents
-- Statistiques d'analyse IA
-- Historique de recherche
-
----
-
-## 🛠️ Développement
-
-### Structure du Projet
-
-```
-esa-tez/
-├── apps/
-│   ├── accounts/          # Authentification & Utilisateurs
-│   ├── documents/         # Gestion des documents
-│   ├── permissions/       # Gestion des permissions
-│   ├── analytics/         # Statistiques
-│   └── search/            # Recherche avancée
-├── services/
-│   ├── ai_service.py      # Service d'analyse IA
-│   ├── file_service.py    # Extraction de fichiers
-│   └── mayan_service.py   # Intégration Mayan EDMS
-├── config/                # Configuration Django
-├── ollama/                # Configuration Ollama
-├── docker-compose.yml     # Orchestration Docker
-└── requirements.txt       # Dépendances Python
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
 ```
 
 ### Tests
 
 ```bash
-# Lancer les tests
-docker-compose exec backend python manage.py test
+# Backend
+cd backend
+python manage.py test
 
-# Créer un superutilisateur
+# Frontend
+cd frontend
+npm test
+```
+
+## 📡 API Documentation
+
+### Authentification
+
+#### Se connecter
+
+```bash
+POST /api/auth/login/
+Content-Type: application/json
+
+{
+  "email": "admin@esa-tez.com",
+  "password": "admin123"
+}
+
+Response:
+{
+  "user": { ... },
+  "tokens": {
+    "access": "eyJ...",
+    "refresh": "eyJ..."
+  },
+  "message": "Connexion réussie"
+}
+```
+
+#### Rafraîchir le token
+
+```bash
+POST /api/auth/refresh/
+Content-Type: application/json
+
+{
+  "refresh": "eyJ..."
+}
+
+Response:
+{
+  "access": "eyJ..."
+}
+```
+
+### Documents
+
+#### Téléverser un document
+
+```bash
+POST /api/documents/
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+
+file: <fichier>
+title: "Mon document"
+description: "Description"
+visibility: "PRIVATE" | "ROLE_BASED" | "PUBLIC"
+tags: "tag1,tag2"
+```
+
+#### Lister les documents
+
+```bash
+GET /api/documents/?search=rapport&visibility=PRIVATE&tags=Finance
+Authorization: Bearer <token>
+```
+
+#### Analyser un document
+
+```bash
+POST /api/documents/{id}/analyze/
+Authorization: Bearer <token>
+```
+
+### Permissions
+
+#### Créer une permission
+
+```bash
+POST /api/permissions/
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "document": "uuid",
+  "user": "uuid",  # ou "role": "ADMIN"
+  "start_time": "2024-01-01T00:00:00Z",
+  "end_time": "2024-12-31T23:59:59Z"
+}
+```
+
+Consultez la documentation complète sur http://localhost:8001/api/docs/
+
+## 🐳 Docker
+
+### Commandes utiles
+
+```bash
+# Lancer tous les services
+docker-compose up -d
+
+# Voir les logs
+docker-compose logs -f
+
+# Arrêter tous les services
+docker-compose down
+
+# Reconstruire les images
+docker-compose build --no-cache
+
+# Accéder au shell du backend
+docker-compose exec backend bash
+
+# Exécuter des commandes Django
+docker-compose exec backend python manage.py migrate
 docker-compose exec backend python manage.py createsuperuser
+```
 
-# Migrations
-docker-compose exec backend python manage.py makemigrations
+### Volumes persistants
+
+Les données sont stockées dans des volumes Docker :
+- `mayan_data` : Documents et métadonnées Mayan
+- `postgres_data` : Base de données PostgreSQL
+- `ai_models` : Modèles IA téléchargés
+
+## 🔒 Sécurité
+
+### Authentification
+- JWT avec refresh tokens
+- Tokens stockés dans localStorage (frontend)
+- Expiration automatique des tokens
+- Refresh automatique avant expiration
+
+### Permissions
+- Contrôle d'accès basé sur les rôles (RBAC)
+- Permissions temporelles (début/fin)
+- Vérification côté serveur et client
+- Isolation des données par utilisateur
+
+### Chiffrement
+- HTTPS recommandé en production
+- Documents chiffrés dans Mayan EDMS
+- Mots de passe hashés (bcrypt)
+
+## 🧪 Tests et Démonstration
+
+### Scénario de test complet
+
+1. **Création de compte**
+   ```bash
+   POST /api/auth/register/
+   ```
+
+2. **Connexion**
+   - Utiliser les identifiants créés
+   - Vérifier la réception des tokens
+
+3. **Téléversement de document**
+   - Téléverser un PDF
+   - Vérifier l'OCR automatique
+   - Vérifier l'analyse IA
+
+4. **Recherche**
+   - Rechercher par mots-clés
+   - Filtrer par tags
+   - Vérifier les résultats
+
+5. **Gestion des permissions**
+   - Créer une permission temporaire
+   - Vérifier l'accès limité dans le temps
+
+### Vidéo de démonstration
+
+Une vidéo de 3-5 minutes est disponible dans le dépôt :
+- Installation Docker
+- Démonstration de l'analyse IA
+- Démonstration de la recherche OCR
+- Gestion des permissions
+- (Bonus) Connexion SSO
+
+## 🐛 Dépannage
+
+### Problèmes courants
+
+#### Le frontend ne se connecte pas au backend
+
+```bash
+# Vérifier que le backend est démarré
+docker-compose ps
+
+# Vérifier les logs
+docker-compose logs backend
+
+# Vérifier la variable d'environnement
+cat .env
+```
+
+#### L'analyse IA ne fonctionne pas
+
+```bash
+# Vérifier que le service IA est démarré
+docker-compose ps ai-service
+
+# Vérifier les logs
+docker-compose logs ai-service
+
+# Vérifier que le modèle est téléchargé
+docker-compose exec ai-service ls -lh /models
+```
+
+#### Erreur de base de données
+
+```bash
+# Réinitialiser la base de données
+docker-compose down -v
+docker-compose up -d
+
+# Appliquer les migrations
 docker-compose exec backend python manage.py migrate
 ```
 
-### Logs
+## 📚 Technologies utilisées
 
-```bash
-# Voir les logs de tous les services
-docker-compose logs -f
+### Frontend
+- **React 18** : Bibliothèque UI
+- **TypeScript** : Typage statique
+- **Vite** : Build tool moderne
+- **Tailwind CSS** : Framework CSS
+- **shadcn-ui** : Composants UI
+- **React Router** : Navigation
+- **Axios/Fetch** : Requêtes HTTP
 
-# Logs d'un service spécifique
-docker-compose logs -f backend
-docker-compose logs -f ollama
-docker-compose logs -f celery
-```
+### Backend
+- **Django 4.2** : Framework web Python
+- **Django REST Framework** : API REST
+- **djangorestframework-simplejwt** : Authentification JWT
+- **PostgreSQL** : Base de données
+- **Celery** (optionnel) : Tâches asynchrones
+- **Redis** (optionnel) : Cache
 
----
+### Infrastructure
+- **Docker** : Conteneurisation
+- **Docker Compose** : Orchestration
+- **Mayan EDMS** : Gestion documentaire
+- **Mistral 7B** : Modèle IA local
+- **Ollama** : Runtime IA
 
-## 🔧 Configuration Avancée
+## 🤝 Contribution
 
-### Variables d'Environnement
+Les contributions sont les bienvenues ! Pour contribuer :
 
-Voir `.env.example` pour la configuration complète.
-
-**Variables clés :**
-```env
-# Django
-DJANGO_SECRET_KEY=your-secret-key
-DEBUG=True
-
-# Base de données
-POSTGRES_DB=esa_tez_db
-POSTGRES_USER=esa_user
-POSTGRES_PASSWORD=secure_password
-
-# Ollama IA
-OLLAMA_HOST=http://ollama:11434
-OLLAMA_MODEL=mistral:7b
-OLLAMA_TIMEOUT=60
-
-# Mayan EDMS
-MAYAN_HOST=http://mayan:8000
-MAYAN_USERNAME=admin
-MAYAN_PASSWORD=admin
-```
-
-### Changer le Modèle IA
-
-Pour utiliser un autre modèle Ollama :
-
-1. Modifier `OLLAMA_MODEL` dans `.env`
-2. Modifier `ollama/init.sh` pour télécharger le modèle souhaité
-3. Rebuild : `docker-compose up --build`
-
-Modèles disponibles : https://ollama.ai/library
-
----
-
-## 📦 Production
-
-### Checklist de Déploiement
-
-- [ ] Changer `DEBUG=False` dans `.env`
-- [ ] Définir un `DJANGO_SECRET_KEY` fort
-- [ ] Configurer des mots de passe sécurisés
-- [ ] Configurer `ALLOWED_HOSTS`
-- [ ] Mettre en place HTTPS
-- [ ] Configurer les backups de la base de données
-- [ ] Limiter l'accès aux ports Docker
-- [ ] Configurer un reverse proxy (Nginx)
-
-### Backup
-
-```bash
-# Backup de la base de données
-docker-compose exec db pg_dump -U esa_user esa_tez_db > backup.sql
-
-# Backup des médias
-tar -czf media_backup.tar.gz media/
-```
-
----
-
-## 🎯 Points Clés du Défi
-
-### ✅ 4 Piliers Implémentés
-
-1. **Architecture 100% Conteneurisée** ✓
-   - Docker Compose avec 6 services
-   - Orchestration complète
-   - Une seule commande de démarrage
-
-2. **Séparation des Responsabilités** ✓
-   - Gestion des rôles (USER/ADMIN)
-   - Authentification JWT
-   - Permissions granulaires
-
-3. **IA Locale et Sécurisée** ✓
-   - Mistral 7B via Ollama
-   - Résumés et mots-clés automatiques
-   - Privacy-First : tout reste local
-
-4. **Interface Modulaire** ✓
-   - API REST complète
-   - Admin Django intégré
-   - Prêt pour un client frontend
-
-### 🏅 Bonus : SSO (En cours)
-
-L'architecture supporte l'intégration SSO via :
-- OIDC (OpenID Connect)
-- SAML
-- OAuth2
-
----
+1. Fork le projet
+2. Créez une branche (`git checkout -b feature/AmazingFeature`)
+3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrez une Pull Request
 
 ## 📝 Licence
 
-Ce projet est développé dans le cadre du Défi National Nuit de l'Info 2024.
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
----
+## 👥 Auteurs
 
-## 👥 Support
+- **ESA-TEZ Team** - Développement initial
+
+## 🙏 Remerciements
+
+- Mayan EDMS pour la gestion documentaire
+- Mistral AI pour le modèle de langage
+- La communauté open source
+
+## 📞 Support
 
 Pour toute question ou problème :
-1. Vérifier les logs : `docker-compose logs`
-2. Redémarrer les services : `docker-compose restart`
-3. Rebuild complet : `docker-compose down && docker-compose up --build`
+- Ouvrir une issue sur GitHub
+- Contacter l'équipe : support@esa-tez.com
 
 ---
 
-## 🎉 Démonstration
-
-### Scénario de Test
-
-1. **Démarrer le système**
-   ```bash
-   docker-compose up
-   ```
-
-2. **Se connecter à l'admin**
-   - URL : http://localhost:8001/admin
-   - Login : admin@esa-tez.com / admin123
-
-3. **Uploader un document PDF**
-   - Via l'API ou l'admin Django
-   - L'analyse IA se lance automatiquement
-
-4. **Voir le résultat**
-   - Le document est analysé par Mistral 7B
-   - Résumé et mots-clés disponibles
-   - Document stocké dans Mayan EDMS
-
----
-
-**Fait avec ❤️ pour la Nuit de l'Info 2024**
-
-
-
+**Note** : Ce projet est en développement actif. Certaines fonctionnalités peuvent évoluer.
