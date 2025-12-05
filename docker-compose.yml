@@ -69,7 +69,7 @@ services:
       - media_data:/app/media
       - static_data:/app/staticfiles
     ports:
-      - "8001:8000"
+      - "8000:8000"
     environment:
       - DEBUG=${DEBUG:-True}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-django-insecure-default-key}
@@ -154,6 +154,3 @@ volumes:
 networks:
   esa-network:
     driver: bridge
-
-
-
